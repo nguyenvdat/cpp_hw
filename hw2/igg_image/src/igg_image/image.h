@@ -15,6 +15,9 @@ public:
 	bool FillFromPgm(const std::string& file_name);
 	bool WriteToPgm(const std::string& file_name);
 	std::vector<float> ComputeHistogram(int bins) const;
+	void DownScale(int scale);
+	void UpScale(int scale);
+
 
 private:
 	int rows_ = 0;
