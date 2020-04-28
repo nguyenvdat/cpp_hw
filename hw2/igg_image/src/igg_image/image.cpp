@@ -24,3 +24,16 @@ bool igg::Image::WriteToPgm(const std::string& file_name) {
 	igg::io_tools::ImageData image_data{rows_, cols_, max_val_, data_};
 	return igg::io_tools::WriteToPgm(image_data, file_name);
 }
+
+std::vector<float> igg::Image::ComputeHistogram(int bins) const {
+	int bin_size = max_val_ / bins;
+	int n_pixels = rows_ * cols_;
+	std::vector<float> bin_count(bins);
+	for (auto elem : data_) {
+		++bin_count[elem / bin_size < bins ? elem / bin_size : bins - 1];
+	}
+	for (auto& elem : bin_count) {
+		elem /= n_pixels;
+	}
+	return bin_count;
+}

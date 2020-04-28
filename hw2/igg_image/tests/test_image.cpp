@@ -36,3 +36,12 @@ TEST(TestImage, FillFunctionTest) {
 	EXPECT_EQ(512, im.rows());
 	EXPECT_EQ(512, im.cols());
 }
+
+TEST(TestImage, ComputeHistogramTest) {
+	igg::Image im = igg::Image();
+	im.FillFromPgm("../data/lena.ascii.pgm");
+	auto bin_count = im.ComputeHistogram(5);
+	float sum = std::accumulate(bin_count.begin(), bin_count.end(), 0.0);
+	EXPECT_EQ(5, bin_count.size());
+	EXPECT_EQ(1, sum);
+}
