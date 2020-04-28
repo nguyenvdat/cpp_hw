@@ -12,6 +12,9 @@ public:
 	int rows() const;
 	int cols() const;
 	int& at(int row, int col);
+	bool FillFromPgm(const std::string& file_name);
+	bool WriteToPgm(const std::string& file_name);
+
 
 private:
 	int rows_ = 0;
