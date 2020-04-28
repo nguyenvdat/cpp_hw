@@ -5,13 +5,19 @@
 namespace igg {
 
 class Image {
- public:
-  ///////////////////// Create the public interface here ///////////////////////
- private:
-  int rows_ = 0;
-  int cols_ = 0;
-  int max_val_ = 255;
-  std::vector<int> data_;
+public:
+	///////////////////// Create the public interface here ///////////////////////
+	Image();
+	Image(int rows, int cols);
+	int rows() const;
+	int cols() const;
+	int& at(int row, int col);
+
+private:
+	int rows_ = 0;
+	int cols_ = 0;
+	int max_val_ = 255;
+	std::vector<int> data_;
 };
 
 }  // namespace igg
