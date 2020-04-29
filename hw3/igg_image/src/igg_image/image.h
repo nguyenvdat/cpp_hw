@@ -5,11 +5,12 @@
 #pragma once
 
 #include <vector>
+#include "io_strategies/strategy.h"
 
 namespace igg {
 
 class Image {
- public:
+public:
   /// A struct within class Image that defines a pixel.
   struct Pixel {
     int red;
@@ -18,8 +19,13 @@ class Image {
   };
 
   // TODO: fill public interface.
+  Image(const IoStrategy& io_strategy);
+  Image(int rows, int cols, const IoStrategy& io_strategy);
+  int rows() const;
+  int cols() const;
+  Pixel& at(int row, int col);
 
- private:
+private:
 
   // TODO: add missing private members when needed.
 
@@ -27,6 +33,7 @@ class Image {
   int cols_ = 0;
   int max_val_ = 255;
   std::vector<Pixel> data_;
+  const IoStrategy& io_strategy_;
 };
 
 }  // namespace igg

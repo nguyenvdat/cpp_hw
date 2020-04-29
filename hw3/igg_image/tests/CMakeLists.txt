@@ -1,5 +1,5 @@
-add_subdirectory(/usr/src/gtest
-                 ${PROJECT_BINARY_DIR}/gtest)
+add_subdirectory(/Users/datnguyen/googletest
+                ${PROJECT_BINARY_DIR}/googletest)
 include(CTest) # Include testing cmake package.
 set(TEST_BINARY ${PROJECT_NAME}_test)
 # add_executable(
@@ -18,3 +18,7 @@ set(TEST_BINARY ${PROJECT_NAME}_test)
 # add_test(
 #   NAME ${TEST_BINARY}
 #   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${TEST_BINARY})
+add_executable(test_image test_image.cpp)
+target_link_libraries(test_image
+                      image
+                      gtest gtest_main)
