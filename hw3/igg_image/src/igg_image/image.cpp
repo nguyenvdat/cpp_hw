@@ -9,7 +9,7 @@ igg::Image::Image(const IoStrategy& io_strategy):  io_strategy_{io_strategy} {}
 int igg::Image::rows() const {return rows_;}
 int igg::Image::cols() const {return cols_;}
 igg::Image::Pixel& igg::Image::at(int row, int col) {
-	return data_.at(row * rows_ + col);
+	return data_.at(row * cols_ + col);
 }
 void igg::Image::DownScale(int scale) {
 	int new_rows = (rows_ - 1) / scale + 1;
@@ -62,19 +62,17 @@ bool igg::Image::ReadFromDisk(const std::string& file_name) {
 	return true;
 }
 
-void igg::Image::WriteToDisk(const std::string& file_name) {
+void igg::Image::WriteToDisk(const std::string& file_name) const {
 	std::vector<std::vector<int>> data;
 	std::vector<int> red_vector;
 	std::vector<int> blue_vector;
 	std::vector<int> green_vector;
 	for (auto elem : data_) {
 		red_vector.push_back(elem.red);
-		blue_vector.push_back(elem.blue);
 		green_vector.push_back(elem.green);
+		blue_vector.push_back(elem.blue);
 	}
-	data.push_back(red_vector);
-	data.push_back(blue_vector);
-	data.push_back(green_vector);
+	data = {red_vector, green_vector, blue_vector};
 	ImageData image_data{rows_, cols_, max_val_, data};
 	io_strategy_.Write(file_name, image_data);
 }
