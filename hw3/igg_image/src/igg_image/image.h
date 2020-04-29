@@ -24,6 +24,9 @@ public:
   int rows() const;
   int cols() const;
   Pixel& at(int row, int col);
+  void DownScale(int scale);
+  void UpScale(int scale);
+
 
 private:
 

@@ -23,3 +23,19 @@ TEST(TestImage, GetterFunctionTest) {
 	EXPECT_EQ(5, im.at(1,2).green);
 	EXPECT_EQ(6, im.at(1,2).blue);
 }
+
+TEST(TestImage, DownScaleTest) {
+	igg::DummyIoStrategy dummy_strategy;
+	igg::Image im = igg::Image(2, 5, dummy_strategy);
+	im.DownScale(2);
+	EXPECT_EQ(1, im.rows());
+	EXPECT_EQ(3, im.cols());
+}
+
+TEST(TestImage, UpScaleTest) {
+	igg::DummyIoStrategy dummy_strategy;
+	igg::Image im = igg::Image(2, 5, dummy_strategy);
+	im.UpScale(2);
+	EXPECT_EQ(4, im.rows());
+	EXPECT_EQ(10, im.cols());
+}
