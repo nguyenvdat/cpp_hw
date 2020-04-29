@@ -26,7 +26,8 @@ public:
   Pixel& at(int row, int col);
   void DownScale(int scale);
   void UpScale(int scale);
-
+  bool ReadFromDisk(const std::string& file_name);
+  void WriteToDisk(const std::string& file_name);
 
 private:
 

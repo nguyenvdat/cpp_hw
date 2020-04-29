@@ -47,3 +47,34 @@ void igg::Image::UpScale(int scale) {
 	cols_ = new_cols;
 	data_ = new_data;
 }
+
+bool igg::Image::ReadFromDisk(const std::string& file_name) {
+	auto image_data = io_strategy_.Read(file_name);
+	rows_ = image_data.rows;
+	cols_ = image_data.cols;
+	max_val_ = image_data.max_val;
+	data_.resize(rows_ * cols_);
+	auto data = image_data.data;
+	for (int i = 0; i < data_.size(); ++i) {
+		Pixel pixel{data[0][i], data[1][i], data[2][i]};
+		data_[i] = pixel;
+	}
+	return true;
+}
+
+void igg::Image::WriteToDisk(const std::string& file_name) {
+	std::vector<std::vector<int>> data;
+	std::vector<int> red_vector;
+	std::vector<int> blue_vector;
+	std::vector<int> green_vector;
+	for (auto elem : data_) {
+		red_vector.push_back(elem.red);
+		blue_vector.push_back(elem.blue);
+		green_vector.push_back(elem.green);
+	}
+	data.push_back(red_vector);
+	data.push_back(blue_vector);
+	data.push_back(green_vector);
+	ImageData image_data{rows_, cols_, max_val_, data};
+	io_strategy_.Write(file_name, image_data);
+}

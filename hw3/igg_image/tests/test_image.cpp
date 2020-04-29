@@ -3,6 +3,7 @@
 
 #include "igg_image/image.h"
 #include "igg_image/io_strategies/dummy_strategy.h"
+#include "igg_image/io_strategies/png_strategy.h"
 #include <numeric>
 
 TEST(TestImage, ConstructorTest) {
@@ -38,4 +39,17 @@ TEST(TestImage, UpScaleTest) {
 	im.UpScale(2);
 	EXPECT_EQ(4, im.rows());
 	EXPECT_EQ(10, im.cols());
+}
+
+TEST(TestImage, ReadFromDiskTest) {
+	igg::PngIoStrategy png_strategy;
+	igg::Image im = igg::Image(2, 5, png_strategy);
+	im.ReadFromDisk("../data/ct1n0g04.png");
+	// im.ReadFromDisk("../data/pbmlib.ascii.ppm");
+}
+
+TEST(TestImage, WriteToDiskTest) {
+	igg::PngIoStrategy png_strategy;
+	igg::Image im = igg::Image(2, 5, png_strategy);
+	im.WriteToDisk("test_write_png");
 }

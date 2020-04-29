@@ -18,6 +18,8 @@ set(TEST_BINARY ${PROJECT_NAME}_test)
 # add_test(
 #   NAME ${TEST_BINARY}
 #   COMMAND ${EXECUTABLE_OUTPUT_PATH}/${TEST_BINARY})
+find_package(PNG REQUIRED)
+include_directories("${PNG_INCLUDE_DIRS}")
 add_executable(test_image test_image.cpp)
 target_link_libraries(test_image
                       image
