@@ -19,8 +19,8 @@ public:
   };
 
   // TODO: fill public interface.
-  Image(const IoStrategy& io_strategy);
-  Image(int rows, int cols, const IoStrategy& io_strategy);
+  Image(std::shared_ptr<IoStrategy> io_strategy);
+  Image(int rows, int cols, std::shared_ptr<IoStrategy>& io_strategy);
   int rows() const;
   int cols() const;
   Pixel& at(int row, int col);
@@ -28,6 +28,7 @@ public:
   void UpScale(int scale);
   bool ReadFromDisk(const std::string& file_name);
   void WriteToDisk(const std::string& file_name) const;
+  void SetIoStrategy(const std::shared_ptr<IoStrategy>& strategy_ptr);
 
 private:
 
@@ -37,7 +38,7 @@ private:
   int cols_ = 0;
   int max_val_ = 255;
   std::vector<Pixel> data_;
-  const IoStrategy& io_strategy_;
+  std::shared_ptr<IoStrategy> io_strategy_ = nullptr;
 };
 
 }  // namespace igg

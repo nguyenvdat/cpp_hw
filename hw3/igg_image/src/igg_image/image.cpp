@@ -2,15 +2,20 @@
 
 #include "image.h"
 
-igg::Image::Image(int rows, int cols, const IoStrategy& io_strategy):  rows_{rows}, cols_{cols}, io_strategy_{io_strategy} {
+igg::Image::Image(int rows, int cols, std::shared_ptr<IoStrategy>& io_strategy):  rows_{rows}, cols_{cols}, io_strategy_{io_strategy} {
 	data_.resize(rows * cols);
 }
-igg::Image::Image(const IoStrategy& io_strategy):  io_strategy_{io_strategy} {}
+igg::Image::Image(std::shared_ptr<IoStrategy> io_strategy):  io_strategy_{io_strategy} {}
 int igg::Image::rows() const {return rows_;}
 int igg::Image::cols() const {return cols_;}
 igg::Image::Pixel& igg::Image::at(int row, int col) {
 	return data_.at(row * cols_ + col);
 }
+
+void igg::Image::SetIoStrategy(const std::shared_ptr<IoStrategy>& strategy_ptr) {
+	io_strategy_ = strategy_ptr;
+}
+
 void igg::Image::DownScale(int scale) {
 	int new_rows = (rows_ - 1) / scale + 1;
 	int new_cols = (cols_ - 1) / scale + 1;
@@ -49,7 +54,10 @@ void igg::Image::UpScale(int scale) {
 }
 
 bool igg::Image::ReadFromDisk(const std::string& file_name) {
-	auto image_data = io_strategy_.Read(file_name);
+	if (io_strategy_ == nullptr) {
+		exit(1);
+	}
+	auto image_data = io_strategy_->Read(file_name);
 	rows_ = image_data.rows;
 	cols_ = image_data.cols;
 	max_val_ = image_data.max_val;
@@ -63,6 +71,9 @@ bool igg::Image::ReadFromDisk(const std::string& file_name) {
 }
 
 void igg::Image::WriteToDisk(const std::string& file_name) const {
+	if (io_strategy_ == nullptr) {
+		exit(1);
+	}
 	std::vector<std::vector<int>> data;
 	std::vector<int> red_vector;
 	std::vector<int> blue_vector;
@@ -74,5 +85,5 @@ void igg::Image::WriteToDisk(const std::string& file_name) const {
 	}
 	data = {red_vector, green_vector, blue_vector};
 	ImageData image_data{rows_, cols_, max_val_, data};
-	io_strategy_.Write(file_name, image_data);
+	io_strategy_->Write(file_name, image_data);
 }
