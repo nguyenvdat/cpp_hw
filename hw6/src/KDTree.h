@@ -112,6 +112,7 @@ private:
     std::shared_ptr<KDTree<N, ElemType>> right_ = nullptr;
     const std::shared_ptr<KDTree<N, ElemType>> find_node1_(const Point<N>& pt, std::shared_ptr<KDTree<N, ElemType>> tree_ptr) const;
     std::tuple<bool, std::shared_ptr<KDTree<N, ElemType>>> find_node_(const Point<N>& pt, std::shared_ptr<KDTree<N, ElemType>> tree_ptr, bool is_insert);
+    void kNNValueHelper(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const;
 };
 
 /** KDTree class implementation details */
@@ -283,4 +284,55 @@ const ElemType& KDTree<N, ElemType>::at (const Point<N>& pt) const {
     }
     throw std::out_of_range ("point does not exist!");
 }
+
+
+template <size_t N, typename ElemType>
+void KDTree<N, ElemType>::kNNValueHelper(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const {
+    bpq.enqueue(value_, Distance(*root_, test_point));
+    if (test_point[axis_] < (*root_)[axis_]) {
+        if (left_)
+            left_ -> kNNValueHelper(bpq, test_point);
+    }
+    else {
+        if (right_)
+            right_ -> kNNValueHelper(bpq, test_point);
+    }
+    if (bpq.size() < bpq.maxSize() || fabs((*root_)[axis_] - test_point[axis_]) < bpq.worst()) {
+        if (test_point[axis_] < (*root_)[axis_]) {
+            if (right_)
+                right_ -> kNNValueHelper(bpq, test_point);
+        }
+        else {
+            if (left_)
+                left_ -> kNNValueHelper(bpq, test_point);
+        }
+    }
+}
+
+template <size_t N, typename ElemType>
+ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& key, size_t k) const {
+    BoundedPQueue<ElemType> bpq(k);
+    kNNValueHelper(bpq, key); 
+    std::map<ElemType, int> count; 
+    // KDTree<N, ElemType> tree;
+    ElemType val;
+    int max_count = -1;
+    ElemType max_val;
+    while (bpq.size() > 0) {
+        val = bpq.dequeueMin();
+        if (count.find(val) != count.end()) {
+            ++count[val];
+        }
+        else {
+            count.insert(pair<ElemType, int>(val, 1));
+        }
+        if (count[val] > max_count) {
+            max_count = count[val];
+            max_val = val;
+        }
+    }
+    std::cout << max_count << std::endl;
+    return max_val;
+}
+
 #endif // KDTREE_INCLUDED
