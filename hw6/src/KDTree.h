@@ -45,7 +45,7 @@ public:
     // -----------------------------------------------------
     // Deep-copies the contents of another KDTree into this one.
     KDTree(const KDTree& rhs);
-    KDTree& operator=(const KDTree& rhs);
+    KDTree<N, ElemType>& operator=(const KDTree<N, ElemType>& rhs);
 
     // size_t dimension() const;
     // Usage: size_t dim = kd.dimension();
@@ -112,7 +112,8 @@ private:
     std::shared_ptr<KDTree<N, ElemType>> right_ = nullptr;
     const std::shared_ptr<KDTree<N, ElemType>> find_node1_(const Point<N>& pt, std::shared_ptr<KDTree<N, ElemType>> tree_ptr) const;
     std::tuple<bool, std::shared_ptr<KDTree<N, ElemType>>> find_node_(const Point<N>& pt, std::shared_ptr<KDTree<N, ElemType>> tree_ptr, bool is_insert);
-    void kNNValueHelper(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const;
+    void kNN_value_helper_(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const;
+    void copy_helper_(const KDTree& other);
 };
 
 /** KDTree class implementation details */
@@ -125,6 +126,11 @@ KDTree<N, ElemType>::KDTree() {
 template <size_t N, typename ElemType>
 KDTree<N, ElemType>::KDTree(const Point<N>& pt, int axis): size_(1), axis_(axis) {
     root_ = std::shared_ptr<Point<N>>(new Point<N>(pt));
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>::KDTree(const KDTree& rhs) {
+    copy_helper_(rhs);
 }
 
 template <size_t N, typename ElemType>
@@ -217,7 +223,7 @@ void KDTree<N, ElemType>::insert(const Point<N>& pt, const ElemType& value) {
         value_ = value;
         size_ = 1;
     }
-    else if (*root_ == pt){
+    else if (*root_ == pt) {
         value_ = value;
     }
     else {
@@ -233,7 +239,7 @@ bool KDTree<N, ElemType>::contains(const Point<N>& pt) const {
     if (!root_) {
         return false;
     }
-    else if (pt == *root_){
+    else if (pt == *root_) {
         return true;
     }
     return find_node1_(pt, nullptr) != nullptr;
@@ -246,7 +252,7 @@ ElemType& KDTree<N, ElemType>::operator[] (const Point<N>& pt) {
         size_ = 1;
         return value_;
     }
-    else if (pt == *root_){
+    else if (pt == *root_) {
         return value_;
     }
     bool found;
@@ -260,7 +266,7 @@ ElemType& KDTree<N, ElemType>::at (const Point<N>& pt) {
     if (!root_) {
         throw std::out_of_range ("point does not exist!");
     }
-    else if (pt == *root_){
+    else if (pt == *root_) {
         return value_;
     }
     auto tree = find_node1_(pt, nullptr);
@@ -275,7 +281,7 @@ const ElemType& KDTree<N, ElemType>::at (const Point<N>& pt) const {
     if (!root_) {
         throw std::out_of_range ("point does not exist!");
     }
-    else if (pt == *root_){
+    else if (pt == *root_) {
         return value_;
     }
     auto tree = find_node1_(pt, nullptr);
@@ -287,24 +293,24 @@ const ElemType& KDTree<N, ElemType>::at (const Point<N>& pt) const {
 
 
 template <size_t N, typename ElemType>
-void KDTree<N, ElemType>::kNNValueHelper(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const {
+void KDTree<N, ElemType>::kNN_value_helper_(BoundedPQueue<ElemType>& bpq, const Point<N>& test_point) const {
     bpq.enqueue(value_, Distance(*root_, test_point));
     if (test_point[axis_] < (*root_)[axis_]) {
         if (left_)
-            left_ -> kNNValueHelper(bpq, test_point);
+            left_ -> kNN_value_helper_(bpq, test_point);
     }
     else {
         if (right_)
-            right_ -> kNNValueHelper(bpq, test_point);
+            right_ -> kNN_value_helper_(bpq, test_point);
     }
     if (bpq.size() < bpq.maxSize() || fabs((*root_)[axis_] - test_point[axis_]) < bpq.worst()) {
         if (test_point[axis_] < (*root_)[axis_]) {
             if (right_)
-                right_ -> kNNValueHelper(bpq, test_point);
+                right_ -> kNN_value_helper_(bpq, test_point);
         }
         else {
             if (left_)
-                left_ -> kNNValueHelper(bpq, test_point);
+                left_ -> kNN_value_helper_(bpq, test_point);
         }
     }
 }
@@ -312,8 +318,8 @@ void KDTree<N, ElemType>::kNNValueHelper(BoundedPQueue<ElemType>& bpq, const Poi
 template <size_t N, typename ElemType>
 ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& key, size_t k) const {
     BoundedPQueue<ElemType> bpq(k);
-    kNNValueHelper(bpq, key); 
-    std::map<ElemType, int> count; 
+    kNN_value_helper_(bpq, key);
+    std::map<ElemType, int> count;
     // KDTree<N, ElemType> tree;
     ElemType val;
     int max_count = -1;
@@ -331,8 +337,32 @@ ElemType KDTree<N, ElemType>::kNNValue(const Point<N>& key, size_t k) const {
             max_val = val;
         }
     }
-    std::cout << max_count << std::endl;
     return max_val;
 }
 
+template <size_t N, typename ElemType>
+void KDTree<N, ElemType>::copy_helper_(const KDTree& other) {
+    root_ = std::shared_ptr<Point<N>>(new Point<N>(*(other.root_)));
+    value_ = other.value_;
+    axis_ = other.axis_;
+    size_ = other.size_;
+    if (other.left_) {
+        left_ = std::shared_ptr<KDTree<N, ElemType>>(new KDTree());
+        left_ -> copy_helper_(*(other.left_));
+    }
+    if (other.right_) {
+        right_ = std::shared_ptr<KDTree<N, ElemType>>(new KDTree());
+        right_ -> copy_helper_(*(other.right_));
+    }
+}
+
+template <size_t N, typename ElemType>
+KDTree<N, ElemType>& KDTree<N, ElemType>::operator=(const KDTree<N, ElemType>& rhs) {
+    if (this == &rhs) {
+        return *this;
+    }
+    copy_helper_(rhs);
+    return *this;
+}
 #endif // KDTREE_INCLUDED
+
